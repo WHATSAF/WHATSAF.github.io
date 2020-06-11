@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>recorder</title>
+</head>
+
+<body>
+    <div>
+        <button id="opr" type="button">开始</button>
+    </div>
+    <div>
+        <audio id="player" controls></audio>
+    </div>
+    <p id="tip"></p>
+
+    <script src="recorder.js"></script>
+    <script>
+        var started = false;
+        window.onload = function () {
+            var recorder = new Recorder({
+                sampleBits: 16,
+                sampleRate: 16000,
+                numChannels: 2
+            });
+
+            document.querySelector('#opr').addEventListener('click', function (e) {
+                if (!started) {
+                    e.target.innerHTML = "停止";
+
+                    recorder.start().then(function () {
+                        document.querySelector('#tip').innerHTML = "开始录音";
+                        started = true;
+                    }, function (err) {
+                        document.querySelector('#tip').innerHTML = "错误：" + err.name + "," + err.message;
+                    });
+                } else {
+                    e.target.innerHTML = "开始";
+
+                    document.querySelector('#tip').innerHTML = "";
+
+                    var blob = recorder.getWAVBlob();
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        var wave = e.target.result;
+                        document.querySelector('#player').src = wave;
+
+                        started = false;
+                    }
+                    reader.readAsDataURL(blob);
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>
